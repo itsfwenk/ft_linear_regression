@@ -4,128 +4,111 @@ import sys
 import json
 import matplotlib.pyplot as plt
 import seaborn as sns
-
-def load(path: str) -> pd.DataFrame:
-    """
-    Takes a path as argument and returns it.
-
-    Args:
-        arg1 (str): The path of the data set to load.
-
-    Returns:
-        A pandas dataframe of the data set.
-    """
-    try:
-        if not os.path.exists(path):
-            raise FileNotFoundError(f"Error: File '{path}' not found.")
-        if not os.path.isfile(path):
-            raise ValueError(f"Error: '{path}' is not a valid file.")
-        if not path.lower().endswith(".csv"):
-            raise AssertionError("file must be .csv.")
-
-        df = pd.read_csv(path)
-        # print(f"Loading dataset of dimensions {df.shape}")
-        return df
-
-    except FileNotFoundError as e:
-        print(f"Error: {e}")
-        return None
-    except ValueError as e:
-        print(f"Error: {e}")
-        return None
-    except pd.errors.EmptyDataError:
-        print(f"Error: The CSV file '{path}' is empty.")
-        return None
-    except pd.errors.ParserError as e:
-        print(
-            f"Error: Could not parse '{path}': {e}")
-        return None
-    except Exception as e:
-        print(f"An unexpected error occurred while loading '{path}': {e}")
-        return None
+import numpy as np
+import utils
 
 
-# def load_predict_param(path: str) -> dict:
-#     try:
-#         if not os.path.exists(path):
-#             raise FileNotFoundError(f"Error: File '{path}' not found.")
-#         if not os.path.isfile(path):
-#             raise ValueError(f"Error: '{path}' is not a valid file.")
-
-#         with open(path, 'r') as f:
-#             json_data = json.load(f)
-
-#         required_keys = ["theta0", "theta1"]
-#         for key in required_keys:
-#             if key not in json_data:
-#                 raise KeyError(f"Missing required key: {key}")
-
-#         theta0 = json_data["theta0"]
-#         theta1 = json_data["theta1"]
-#         if not isinstance(theta0, (int, float)):
-#             raise TypeError(f"theta0 must be a number, got {type(theta0).__name__}")
-#         if not isinstance(theta1, (int, float)):
-#             raise TypeError(f"theta1 must be a number, got {type(theta1).__name__}")
-
-#         return json_data
-
-#     except (FileNotFoundError, ValueError, json.JSONDecodeError, KeyError, TypeError) as e:
-#         print(e)
-#         sys.exit(1)
-
-
-def plot_dots(x, y, x_name, y_name):
+def plot_lr(x, y, theta0, theta1):
     df = pd.DataFrame({
-        x_name: x,
-        y_name: y
+        "km": x,
+        "price": y
     })
-    sns.scatterplot(data=df, x=x_name, y=y_name)
+    y_hat = theta0 + theta1 * np.array(x)
+    evaluate_regression(y, y_hat)
+    sns.scatterplot(data=df, x="km", y="price")
+    plt.plot(x, y_hat, color="magenta", label="Regression Line")
+    plt.xlabel("Mileage (km)")
+    plt.ylabel("Price (EUR)")
+    plt.legend()
     plt.tight_layout()
     plt.show()
 
 
+
+def minmax_norm(x: np.ndarray) -> np.ndarray:
+    '''
+    Performs min-max normalization on data array
+    '''
+    xmin = np.min(x)
+    xmax = np.max(x)
+    normalized_data = (x - xmin) / (xmax - xmin)
+    return normalized_data
+
+
+def denormalize_thetas(theta0, theta1, x: np.ndarray) :
+    '''
+    Denormalize thetas values.
+    '''
+    real_theta1 = theta1 / (np.max(x) - np.min(x))
+    real_theta0 = theta0 - real_theta1 * np.min(x)
+    return real_theta0, real_theta1
+
+
+def evaluate_regression(y_true, y_pred):
+    """
+    Calculates regression metrics:
+    - MAE (Mean Absolute Error)
+    - RMSE (Root Mean Square Error)
+    - R² Score (Coefficient of Determination)
+    """
+    y_true = np.array(y_true)
+    y_pred = np.array(y_pred)
+
+    m = len(y_true)
+
+    mae = np.mean(np.abs(y_pred - y_true))
+
+    rmse = np.sqrt(np.sum((y_pred - y_true) ** 2) / m)
+
+    ss_total = np.sum((y_true - np.mean(y_true)) ** 2)
+    ss_residual = np.sum((y_true - y_pred) ** 2)
+    r2 = 1 - (ss_residual / ss_total)
+
+    print(f"MAE = {mae}")
+    print(f"RMSE = {rmse}")
+    print(f"R2 = {r2}")
+
+
+
+
 def main():
     datafilename = 'data.csv'
-    # paramfilename = 'predict_param.txt'
-    df = load(datafilename)
+    df = utils.load_csv(datafilename)
 
     if df is None:
         sys.exit(1)
-    km = df.loc[:,'km'].values.flatten()
-    price = df.loc[:,'price'].values.flatten()
-
-    plot_dots(km, price, "km", "price")
-    # json_data = load_predict_param(paramfilename)
-    # theta0 = json_data['theta0']
-    # theta1 = json_data['theta1']
+    km = df.loc[:,'km'].values.flatten().astype(float)
+    price = df.loc[:,'price'].values.flatten().astype(float)
 
     theta0 = 0
     theta1 = 0
-    learningRate = 1e-8
+    learningRate = 0.01
     iterations = 1000
 
-    # km_mean = km.mean()
-    # km_std = km.std()
-    # km_scaled = (km - km_mean) / km_std
+    km_norm = minmax_norm(km)
 
     for i in range(iterations):
-        m = len(km)
+        m = len(km_norm)
         for i in range(iterations):
-            estimatePrice = theta0 + theta1 * km
+            estimatePrice = theta0 + theta1 * km_norm
             error = estimatePrice - price
 
             tmpTheta0 = (learningRate / m) * error.sum()
-            tmpTheta1 = (learningRate / m) * (error * km).sum()
+            tmpTheta1 = (learningRate / m) * (error * km_norm).sum()
 
             theta0 -= tmpTheta0
             theta1 -= tmpTheta1
 
-    data = {"theta0": theta0, "theta1": theta1}
+    real_theta0, real_theta1 = denormalize_thetas(theta0,theta1, km)
+
+    data = {"theta0": real_theta0, "theta1": real_theta1}
     print(data)
 
-    print(f"For a car of 240000km, price is : {theta0 + theta1 * 240000}")
-    with open('predict_param.txt', 'w') as f:
+    # print(f"For a car of 240000km, price is : {real_theta0 + real_theta1 * 240000}")
+    with open('thetas.txt', 'w') as f:
         json.dump(data, f)
+
+    plot_lr(km, price, real_theta0, real_theta1)
 
 
 

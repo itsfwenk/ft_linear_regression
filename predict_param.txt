@@ -1,1 +1,0 @@
-{"theta0": NaN, "theta1": NaN}
