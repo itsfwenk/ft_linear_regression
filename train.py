@@ -14,7 +14,7 @@ def plot_lr(x, y, theta0, theta1):
         "price": y
     })
     y_hat = theta0 + theta1 * np.array(x)
-    evaluate_regression(y, y_hat)
+    # evaluate_regression(y, y_hat)
     sns.scatterplot(data=df, x="km", y="price")
     plt.plot(x, y_hat, color="magenta", label="Regression Line")
     plt.xlabel("Mileage (km)")
@@ -44,29 +44,29 @@ def denormalize_thetas(theta0, theta1, x: np.ndarray) :
     return real_theta0, real_theta1
 
 
-def evaluate_regression(y_true, y_pred):
-    """
-    Calculates regression metrics:
-    - MAE (Mean Absolute Error)
-    - RMSE (Root Mean Square Error)
-    - R² Score (Coefficient of Determination)
-    """
-    y_true = np.array(y_true)
-    y_pred = np.array(y_pred)
+# def evaluate_regression(y_true, y_pred):
+#     """
+#     Calculates regression metrics:
+#     - MAE (Mean Absolute Error)
+#     - RMSE (Root Mean Square Error)
+#     - R² Score (Coefficient of Determination)
+#     """
+#     y_true = np.array(y_true)
+#     y_pred = np.array(y_pred)
 
-    m = len(y_true)
+#     m = len(y_true)
 
-    mae = np.mean(np.abs(y_pred - y_true))
+#     mae = np.mean(np.abs(y_pred - y_true))
 
-    rmse = np.sqrt(np.sum((y_pred - y_true) ** 2) / m)
+#     rmse = np.sqrt(np.sum((y_pred - y_true) ** 2) / m)
 
-    ss_total = np.sum((y_true - np.mean(y_true)) ** 2)
-    ss_residual = np.sum((y_true - y_pred) ** 2)
-    r2 = 1 - (ss_residual / ss_total)
+#     ss_total = np.sum((y_true - np.mean(y_true)) ** 2)
+#     ss_residual = np.sum((y_true - y_pred) ** 2)
+#     r2 = 1 - (ss_residual / ss_total)
 
-    print(f"MAE = {mae}")
-    print(f"RMSE = {rmse}")
-    print(f"R2 = {r2}")
+#     print(f"MAE = {mae}")
+#     print(f"RMSE = {rmse}")
+#     print(f"R2 = {r2}")
 
 
 
