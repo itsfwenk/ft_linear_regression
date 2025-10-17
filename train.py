@@ -9,6 +9,8 @@ import utils
 
 
 def plot_lr(x, y, theta0, theta1):
+    '''
+    Plots the linear regression line along with the data points.'''
     df = pd.DataFrame({
         "km": x,
         "price": y
@@ -72,6 +74,10 @@ def denormalize_thetas(theta0, theta1, x: np.ndarray) :
 
 
 def main():
+    '''
+    Trains a linear regression model using gradient descent on the data from data.csv file.
+    Saves the learned parameters (theta0 and theta1) to thetas.txt file.
+    '''
     datafilename = 'data.csv'
     df = utils.load_csv(datafilename)
 
