@@ -10,7 +10,8 @@ import utils
 
 def plot_lr(x, y, theta0, theta1):
     '''
-    Plots the linear regression line along with the data points.'''
+    Plots the linear regression line along with the data points.
+    '''
     df = pd.DataFrame({
         "km": x,
         "price": y
@@ -110,7 +111,6 @@ def main():
     data = {"theta0": real_theta0, "theta1": real_theta1}
     print(data)
 
-    # print(f"For a car of 240000km, price is : {real_theta0 + real_theta1 * 240000}")
     with open('thetas.txt', 'w') as f:
         json.dump(data, f)
 
