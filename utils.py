@@ -41,6 +41,13 @@ def load_csv(path: str) -> pd.DataFrame:
 
 
 def load_thetas(path: str) -> dict:
+    '''
+    Loads model parameters from a JSON file.
+    Args:
+        path (str): The path to the JSON file containing model parameters.
+    Returns:
+        dict: A dictionary with model parameters theta0 and theta1.
+    '''
     try:
         if not os.path.exists(path):
             raise FileNotFoundError(f"Error: File '{path}' not found.")

@@ -32,6 +32,9 @@ def evaluate_regression(y_true, y_pred):
     print(f"R2 = {r2}")
 
 def main():
+    '''
+    Loads the model parameters from thetas.txt and evaluates the model on data.csv file.
+    '''
     with open(MODEL_FILE, "r") as f:
         model = json.load(f)
 
